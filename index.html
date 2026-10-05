@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Generador de contraseñas</title>
+</head>
+<body style="font-family:Arial; max-width:450px; margin:40px auto">
+<h1>Generador de contraseñas</h1>
+
+<p><label>Número de palabras:
+  <input type="number" id="numPalabras" value="4" min="1" max="10"></label></p>
+<p><label><input type="checkbox" id="mayusculas" checked> Empezar cada palabra en mayúscula</label></p>
+<p><label><input type="checkbox" id="sinRepetir" checked> No repetir palabras</label></p>
+<p><label>Separador: <input type="text" id="separador" value="-" size="2"></label></p>
+
+<button id="generar">Generar</button>
+<button id="copiar">Copiar</button>
+
+<h2 id="resultado"></h2>
+<p id="info"></p>
+
+<script>
+// Diccionario guardado en una variable
+const diccionario = [
+  "casa", "perro", "gato", "libro", "mesa", "silla", "coche", "playa", "monte", "rio",
+  "luna", "sol", "nube", "fuego", "agua", "tierra", "viento", "arbol", "flor", "piedra",
+  "camino", "puente", "torre", "castillo", "barco", "isla", "bosque", "campo", "ciudad", "calle",
+  "pan", "queso", "leche", "fruta", "naranja", "limon", "tomate", "patata", "arroz", "sopa",
+  "reloj", "llave", "puerta", "ventana", "lampara", "espejo", "cuadro", "radio", "tren", "avion",
+  "verde", "rojo", "azul", "negro", "blanco", "grande", "pequeño", "rapido", "lento", "feliz"
+];
+
+function numeroAleatorio(max) {
+  // Más seguro que Math.random para contraseñas
+  return crypto.getRandomValues(new Uint32Array(1))[0] % max;
+}
+
+function generar() {
+  let n = parseInt(document.getElementById("numPalabras").value);
+  let mayus = document.getElementById("mayusculas").checked;
+  let sinRepetir = document.getElementById("sinRepetir").checked;
+  let sep = document.getElementById("separador").value;
+
+  if (sinRepetir && n > diccionario.length) n = diccionario.length;
+
+  let elegidas = [];
+  while (elegidas.length < n) {
+    let palabra = diccionario[numeroAleatorio(diccionario.length)];
+    if (sinRepetir && elegidas.includes(palabra)) continue;
+    if (mayus) palabra = palabra[0].toUpperCase() + palabra.slice(1);
+    elegidas.push(palabra);
+  }
+
+  let contrasena = elegidas.join(sep);
+  document.getElementById("resultado").textContent = contrasena;
+  document.getElementById("info").textContent =
+    contrasena.length + " caracteres" +
+    (contrasena.length < 15 ? " (el NIST recomienda al menos 15: añade más palabras)" : " ✔");
+}
+
+document.getElementById("generar").addEventListener("click", generar);
+document.getElementById("copiar").addEventListener("click", () => {
+  navigator.clipboard.writeText(document.getElementById("resultado").textContent);
+});
+generar();
+</script>
+</body>
+</html>
